@@ -4,7 +4,6 @@ import pdfplumber
 from operator import itemgetter
 from langchain_core.documents import Document
 
-
 class pdf_loader:
 
     def __init__(self, directory_path) -> None:
