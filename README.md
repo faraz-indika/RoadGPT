@@ -8,3 +8,7 @@
     project_id = "id_of_project_on_vertex_ai"
     location = "location_of_project_on_vertex_ai"
     '''
+say hi 
+'''python
+print('hello')
+'''
