@@ -1,18 +1,4 @@
 import os
-import warnings
-warnings.filterwarnings("ignore")
-from dotenv import load_dotenv
-from distutils.util import strtobool
-import vertexai
-from DocumentLoader import pdf_loader
-from DocumentRetriever import Retriever
-from langchain.prompts import PromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
-from langchain_google_vertexai import VertexAI
-from Interface import chat_ui
-
-import os
 import json
 from tabulate import tabulate
 import pdfplumber
@@ -32,6 +18,20 @@ import gradio as gr
 from gradio.themes.base import Base
 from gradio.themes.utils import colors, fonts, sizes
 from typing import Iterable
+
+import os
+import warnings
+warnings.filterwarnings("ignore")
+from dotenv import load_dotenv
+from distutils.util import strtobool
+import vertexai
+from DocumentLoader import pdf_loader
+from DocumentRetriever import Retriever
+from langchain.prompts import PromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain_google_vertexai import VertexAI
+from Interface import chat_ui
 
 load_dotenv()
 DIRECTORY_PATH = os.getenv("path_to_pdf_directory")
