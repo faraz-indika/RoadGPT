@@ -1,14 +1,31 @@
 import os
+import json
 from tabulate import tabulate
 import pdfplumber
 from operator import itemgetter
 from langchain_core.documents import Document
+
+FILE_PATH = "DocStore"
 
 class pdf_loader:
 
     def __init__(self, directory_path) -> None:
         self.directory_path = directory_path
         self.pdfs = [directory_path + pdf for pdf in os.listdir(directory_path)]
+
+    def save_docs(self, documents, file_path):
+        with open(file_path, 'w') as jsonl_file:
+            for document in documents:
+                jsonl_file.write(document.json() + '\n')
+
+    def load_docs(self, file_path):
+        documents = []
+        with open(file_path, 'r') as jsonl_file:
+            for line in jsonl_file:
+                data = json.loads(line)
+                obj = Document(**data)
+                documents.append(obj)
+        return documents
 
     def check_bboxes(self, word, table_bbox):
         l = word['x0'], word['top'], word['x1'], word['bottom']
@@ -38,6 +55,11 @@ class pdf_loader:
         return final_docs
 
     def load(self):
+        print("> LOADING DOCUMENTS...")
+        if os.path.isfile(FILE_PATH):
+            documents = self.load_docs(FILE_PATH)
+            print("> DOCUMENTS LOADED")
+            return documents
         documents = []
         for file in self.pdfs:
             pdf = pdfplumber.open(file)
@@ -60,4 +82,6 @@ class pdf_loader:
                 documents.append(Document(metadata={'source' : doc_name, 'page' : page_number}, page_content=self.clean_content(doc_page)))
             
         documents = self.clean_documents(documents)
+        self.save_docs(documents, FILE_PATH)
+        print("> DOCUMENTS LOADED")
         return documents
