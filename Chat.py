@@ -1,25 +1,4 @@
 import os
-import json
-from tabulate import tabulate
-import pdfplumber
-from operator import itemgetter
-from langchain_core.documents import Document
-
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community import vectorstores
-from langchain.storage import InMemoryStore
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.retrievers import ParentDocumentRetriever
-from langchain_community.retrievers import BM25Retriever
-from langchain.retrievers import EnsembleRetriever
-
-import time
-import gradio as gr
-from gradio.themes.base import Base
-from gradio.themes.utils import colors, fonts, sizes
-from typing import Iterable
-
-import os
 import warnings
 warnings.filterwarnings("ignore")
 from dotenv import load_dotenv
