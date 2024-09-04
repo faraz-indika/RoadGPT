@@ -118,6 +118,39 @@ footer {
 
 def chat_ui(chain):
 
+    def add_links(response, context):
+        sry = '''
+        I am sorry, I dont have answer to your query. Please try rephrasing your question.
+        '''
+        if sry in response:
+            return response
+        links = [f'    <a href="{document.metadata['link']}#page={document.metadata['page'] + document.metadata['start']}" style="text-decoration:none;">{document.metadata['source']} : {document.metadata['page']}</a>' for document in context]
+        links = ('').join(link for link in links)
+        start = '''
+        <html>
+        <head>
+        <title>Add Links</title>
+        <style>
+        a {
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            background-color: #b3cce6;
+            color: #FFFFFF
+        }
+        </style>
+        </head>
+        <body>
+        <p>Read more from:</p>
+        <ul>'''
+        end  = '''
+        </ul>
+        </body>
+        </html>
+        '''
+        return response + start + links + end
+
     def print_like_dislike(x: gr.LikeData):
         print(x.index, x.value, x.liked)
 
@@ -125,7 +158,7 @@ def chat_ui(chain):
         history.append((message["text"], None))
         return history, gr.MultimodalTextbox(value=None, interactive=False)
 
-    def chat_with_image(history):
+    def chat_with_pdf(history):
         current_history = ''
         if len(history) > 1: current_history =f"Question By User: {history[-2][0]} /n Reply From Chatbot: {history[-2][1]}"
         last_message = history[-1][0]
@@ -140,9 +173,9 @@ def chat_ui(chain):
         response = llm_response["answer"]
         print(f'RESPONSE: \n{response}')
         history[-1][1] = ""
-        for character in response:
+        for character in add_links(response, llm_response['context']):
             history[-1][1] += character
-            time.sleep(0.02)
+            # time.sleep(0.02)
             yield history
 
     with gr.Blocks(theme=seafoam, css=css) as demo:
@@ -168,12 +201,11 @@ def chat_ui(chain):
             bubble_full_width=False
         )
 
-        chat_input = gr.MultimodalTextbox(interactive=True, file_types=["image"], placeholder="Enter message or upload file...", show_label=False, elem_id="chat_input")
+        chat_input = gr.MultimodalTextbox(interactive=True, file_types=["image"], placeholder="Enter message...", show_label=False, elem_id="chat_input")
 
         chat_msg = chat_input.submit(add_message, [chatbot, chat_input], [chatbot, chat_input])
-        bot_msg = chat_msg.then(chat_with_image, chatbot, chatbot, api_name="bot_response")
+        bot_msg = chat_msg.then(chat_with_pdf, chatbot, chatbot, api_name="bot_response")
         bot_msg.then(lambda: gr.MultimodalTextbox(interactive=True), None, [chat_input])
-
         chatbot.like(print_like_dislike, None, None)
         gr.HTML("</div>")
     demo.queue()

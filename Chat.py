@@ -33,12 +33,11 @@ You are given information about Public Safety Standards of the Republic of India
 <context>
 {context}
 </context>
-Answer from the context and Chat History only, if you don't know the answer, just reply "I am sorry, I dont have answer to your query. Please try rephrasing your question."
-Just reply to the answer Once Only, dont put up any follow up questions
 Chat History:
 <chat_history>
 {chat_history}
 </chat_history>
+Answer from the context and Chat History only, if you don't know the answer, just reply "I am sorry, I dont have answer to your query. Please try rephrasing your question."
 Question By User: {input}
 """
 

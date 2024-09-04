@@ -6,6 +6,8 @@ from operator import itemgetter
 from langchain_core.documents import Document
 
 FILE_PATH = "DocStore"
+with open("link_directory.json", "r") as f:
+    LINK_DIRECTORY = json.load(f)
 
 class pdf_loader:
 
@@ -46,10 +48,17 @@ class pdf_loader:
 
     def clean_documents(self, documents):
         final_docs = []
+        doc = ''
         for document in documents:
+            current_doc = document.metadata['source']
+            if doc != current_doc:
+                doc = current_doc
+                first_page = documents.index(document)
             if document.metadata['page'] == 1:
                 index = documents.index(document)
+                start = index - first_page
                 while index < len(documents) and isinstance(documents[index].metadata['page'], int):
+                    documents[index].metadata['start'] = start
                     final_docs.append(documents[index])
                     index += 1
         return final_docs
@@ -61,9 +70,11 @@ class pdf_loader:
             print("> DOCUMENTS LOADED")
             return documents
         documents = []
+        doc_count = 0
         for file in self.pdfs:
             pdf = pdfplumber.open(file)
             doc_name = str(file[len(self.directory_path): -4])
+            doc_link = LINK_DIRECTORY[doc_name]
             for page in pdf.pages:
                 doc_page = ''
                 tables = page.find_tables()
@@ -79,7 +90,9 @@ class pdf_loader:
                     elif 'table' in cluster[0]:
                         doc_page += ' ' + self.format_table(cluster[0]['table'])
                 page_number = int(doc_page.split()[-1]) if doc_page != '' and doc_page.split()[-1].isdigit() else None
-                documents.append(Document(metadata={'source' : doc_name, 'page' : page_number}, page_content=self.clean_content(doc_page)))
+                documents.append(Document(metadata={'source' : doc_name, 'link' : doc_link, 'page' : page_number}, page_content=self.clean_content(doc_page)))
+            doc_count += 1
+            print(f'- ({doc_count}/{len(self.pdfs)}) {doc_name}')
             
         documents = self.clean_documents(documents)
         self.save_docs(documents, FILE_PATH)
